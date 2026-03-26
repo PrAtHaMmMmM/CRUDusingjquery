@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Tracker</title>
+  <meta name="description" content="A minimalist personal finance tracker to manage your income and expenses." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">₿</span>
+          <span class="logo-text">FinanceTracker</span>
+        </div>
+        <span class="header-date" id="currentDate"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- Summary Cards -->
+    <section class="summary-grid" aria-label="Financial Summary">
+      <div class="card card--balance" id="balanceCard">
+        <p class="card-label">Total Balance</p>
+        <h2 class="card-value" id="totalBalance">$0.00</h2>
+        <div class="card-bar"></div>
+      </div>
+      <div class="card card--income">
+        <p class="card-label">Total Income</p>
+        <h2 class="card-value" id="totalIncome">$0.00</h2>
+        <div class="card-icon">↑</div>
+      </div>
+      <div class="card card--expense">
+        <p class="card-label">Total Expenses</p>
+        <h2 class="card-value" id="totalExpense">$0.00</h2>
+        <div class="card-icon">↓</div>
+      </div>
+    </section>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Add / Edit Form -->
+      <section class="panel" id="formPanel">
+        <h3 class="panel-title" id="formTitle">Add Transaction</h3>
+
+        <form id="transactionForm" novalidate>
+          <input type="hidden" id="editId" value="" />
+
+          <div class="field">
+            <label class="field-label" for="txDescription">Description</label>
+            <input class="field-input" type="text" id="txDescription" placeholder="e.g. Freelance payment"
+              maxlength="60" autocomplete="off" />
+            <span class="field-error" id="errDescription"></span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="txAmount">Amount ($)</label>
+            <input class="field-input" type="number" id="txAmount" placeholder="0.00" min="0.01" step="0.01" />
+            <span class="field-error" id="errAmount"></span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="txCategory">Category</label>
+            <select class="field-input field-select" id="txCategory">
+              <option value="">— Select category —</option>
+              <optgroup label="Income">
+                <option value="Salary">Salary</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Investment">Investment</option>
+                <option value="Gift">Gift</option>
+                <option value="Other Income">Other Income</option>
+              </optgroup>
+              <optgroup label="Expense">
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Housing">Housing</option>
+                <option value="Health">Health</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Education">Education</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Other Expense">Other Expense</option>
+              </optgroup>
+            </select>
+            <span class="field-error" id="errCategory"></span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="txType">Type</label>
+            <div class="type-toggle">
+              <button type="button" class="type-btn type-btn--income active" id="btnIncome" data-type="income">
+                ↑ Income
+              </button>
+              <button type="button" class="type-btn type-btn--expense" id="btnExpense" data-type="expense">
+                ↓ Expense
+              </button>
+            </div>
+            <input type="hidden" id="txType" value="income" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="txDate">Date</label>
+            <input class="field-input" type="date" id="txDate" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary" id="submitBtn">Add Transaction</button>
+            <button type="button" class="btn btn--ghost" id="cancelEditBtn" style="display:none;">Cancel</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Transactions List -->
+      <section class="panel" id="listPanel">
+        <div class="list-header">
+          <h3 class="panel-title">Transactions</h3>
+          <div class="list-controls">
+            <select class="filter-select" id="filterType">
+              <option value="all">All</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+            <select class="filter-select" id="filterCategory">
+              <option value="all">All Categories</option>
+            </select>
+            <button class="btn btn--danger-ghost" id="clearAllBtn" title="Clear all transactions">Clear All</button>
+          </div>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon">📊</div>
+          <p>No transactions yet.<br />Add your first one!</p>
+        </div>
+
+        <ul class="tx-list" id="txList" aria-label="Transaction list"></ul>
+
+        <div class="pagination" id="pagination"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h4 class="modal-title" id="modalTitle">Delete Transaction?</h4>
+      <p class="modal-body">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn--ghost" id="modalCancel">Cancel</button>
+        <button class="btn btn--danger" id="modalConfirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+
+</html>
